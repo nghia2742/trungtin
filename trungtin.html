@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trung Tín — Sửa Xe Mô Tô / Motorbike Repair</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --oil: #121212;
+      --oil-2: #1a1a1a;
+      --oil-3: #252525;
+      --concrete: #a8a8a8;
+      --concrete-dark: #6b6b6b;
+      --blue: #2563eb;
+      --blue-light: #3b82f6;
+      --blue-dark: #1d4ed8;
+      --cream: #f5f0e8;
+      --font-display: 'Be Vietnam Pro', sans-serif;
+      --font-body: 'Be Vietnam Pro', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--oil);
+      color: var(--cream);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    ::selection { background: var(--blue); color: var(--oil); }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 256px 256px;
+    }
+
+    .lang-toggle {
+      display: flex;
+      gap: 0.25rem;
+      background: rgba(18,18,18,0.8);
+      backdrop-filter: blur(12px);
+      padding: 0.35rem;
+      border: 1px solid rgba(37,99,235,0.2);
+      border-radius: 4px;
+    }
+    .lang-btn {
+      padding: 0.4rem 1rem;
+      background: none;
+      border: none;
+      color: var(--concrete-dark);
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-radius: 2px;
+    }
+    .lang-btn.active {
+      background: var(--blue);
+      color: var(--oil);
+    }
+    .lang-btn:not(.active):hover { color: var(--cream); }
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1.5rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      transition: background 0.4s;
+    }
+    nav.scrolled { background: rgba(18,18,18,0.9); backdrop-filter: blur(20px); }
+    .nav-links { margin-right: auto; display: flex; gap: 2.5rem; }
+    .logo {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      letter-spacing: 0.08em;
+      color: var(--cream);
+      text-decoration: none;
+      line-height: 1;
+    }
+    .logo span { color: var(--blue); }
+    .logo-sub {
+      display: block;
+      font-family: var(--font-body);
+      font-size: 0.55rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--concrete-dark);
+      margin-top: 0.15rem;
+    }
+    .nav-links a {
+      color: var(--concrete-dark);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      transition: color 0.3s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1.5px;
+      background: var(--blue);
+      transition: width 0.3s;
+    }
+    .nav-links a:hover { color: var(--cream); }
+    .nav-links a:hover::after { width: 100%; }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 2rem 4rem;
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(ellipse 100% 60% at 30% 50%, rgba(37,99,235,0.08) 0%, transparent 70%),
+                  linear-gradient(180deg, var(--oil) 0%, var(--oil-2) 100%);
+    }
+    .hero-grid-bg {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(37,99,235,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37,99,235,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      z-index: 0;
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 800px; }
+    .hero-tag {
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(5rem, 14vw, 10rem);
+      font-weight: 800;
+      line-height: 0.82;
+      letter-spacing: -0.02em;
+      color: var(--cream);
+    }
+    .hero h1 .strike {
+      display: inline-block;
+      position: relative;
+    }
+    .hero h1 .strike::after {
+      content: '';
+      position: absolute;
+      left: -5%;
+      right: -5%;
+      top: 52%;
+      height: 4px;
+      background: var(--blue);
+      transform: rotate(-5deg);
+    }
+    .hero h1 .outline {
+      color: transparent;
+      -webkit-text-stroke: 1.5px var(--cream);
+    }
+    .hero-sub {
+      font-size: 1.05rem;
+      font-weight: 300;
+      color: var(--concrete);
+      max-width: 500px;
+      margin-top: 0.75rem;
+      line-height: 1.7;
+    }
+    .hero-cta {
+      display: inline-block;
+      margin-top: 1.5rem;
+      padding: 1rem 2.5rem;
+      background: var(--blue);
+      color: var(--oil);
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.3s;
+      border: none;
+      cursor: pointer;
+    }
+    .hero-cta:hover { background: var(--blue-light); transform: translateY(-2px); }
+
+    .hero-illustration {
+      position: absolute;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-58%);
+      z-index: 1;
+      width: 45%;
+      max-width: 550px;
+      opacity: 0.12;
+      pointer-events: none;
+    }
+    .hero-illustration svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    section { padding: 6rem 3rem; }
+
+    .section-label {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 700;
+      line-height: 1;
+      color: var(--cream);
+      letter-spacing: -0.01em;
+    }
+
+    .services {
+      background: var(--oil-2);
+    }
+    .services-header { text-align: center; margin-bottom: 4rem; }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      max-width: 1000px;
+      margin: 0 auto;
+      background: rgba(37,99,235,0.08);
+    }
+    .service-card {
+      padding: 3rem 2rem;
+      background: var(--oil-2);
+      transition: background 0.3s;
+      position: relative;
+    }
+    .service-card:hover { background: var(--oil-3); }
+    .service-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .service-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--cream);
+      letter-spacing: 0.02em;
+      margin-bottom: 0.5rem;
+    }
+    .service-card p {
+      font-size: 0.85rem;
+      color: var(--concrete);
+      font-weight: 300;
+      line-height: 1.6;
+    }
+    .service-number {
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+      font-family: var(--font-display);
+      font-size: 3rem;
+      color: rgba(37,99,235,0.06);
+      line-height: 1;
+    }
+
+    .about {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      align-items: center;
+    }
+    .about-visual {
+      position: relative;
+      aspect-ratio: 1;
+      overflow: hidden;
+      background: var(--oil-3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .about-visual .hex {
+      width: 180px;
+      height: 180px;
+      background: rgba(37,99,235,0.06);
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      position: relative;
+    }
+    .about-visual .hex-ring {
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      border: 1px solid rgba(37,99,235,0.1);
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      animation: rotate 20s linear infinite;
+    }
+    @keyframes rotate {
+      to { transform: rotate(360deg); }
+    }
+    .about p {
+      font-size: 0.95rem;
+      color: var(--concrete);
+      font-weight: 300;
+      line-height: 1.8;
+      margin-bottom: 1.2rem;
+    }
+    .about strong { color: var(--cream); font-weight: 500; }
+
+    .contact {
+      text-align: center;
+      background: radial-gradient(ellipse 60% 50% at 50% 100%, rgba(37,99,235,0.06) 0%, transparent 70%),
+                  var(--oil);
+    }
+    .contact-info {
+      display: flex;
+      justify-content: center;
+      gap: 4rem;
+      margin-top: 3rem;
+      flex-wrap: wrap;
+    }
+    .contact-info > div { text-align: center; }
+    .contact-info h4 {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      color: var(--blue);
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .contact-info p {
+      font-size: 0.9rem;
+      color: var(--concrete);
+      font-weight: 300;
+    }
+
+    .divider {
+      width: 1px;
+      height: 50px;
+      background: rgba(37,99,235,0.15);
+      margin: 3rem auto;
+    }
+
+    .map {
+      text-align: center;
+      padding-bottom: 0;
+    }
+    .map-wrapper {
+      width: 100%;
+      max-width: 900px;
+      margin: 2.5rem auto 0;
+      border: 1px solid rgba(37,99,235,0.1);
+      overflow: hidden;
+      position: relative;
+    }
+    .map-wrapper iframe {
+      width: 100%;
+      height: 400px;
+      display: block;
+      border: 0;
+    }
+
+    footer {
+      padding: 2.5rem 3rem;
+      text-align: center;
+      border-top: 1px solid rgba(37,99,235,0.06);
+    }
+    footer .logo {
+      display: inline-block;
+      font-size: 1.3rem;
+    }
+    footer p {
+      font-size: 0.75rem;
+      color: var(--concrete-dark);
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .services-grid { grid-template-columns: repeat(2, 1fr); }
+      .hero-illustration { width: 35%; opacity: 0.08; }
+    }
+
+    @media (max-width: 768px) {
+      .lang-toggle { top: 0.75rem; right: 0.75rem; }
+      .lang-btn { padding: 0.25rem 0.6rem; font-size: 0.6rem; }
+
+      nav { padding: 0.6rem 0.75rem; gap: 0.5rem; }
+      .logo { font-size: 1.2rem; }
+      .logo-sub { font-size: 0.4rem; }
+      .nav-links { gap: 0.7rem; }
+      .nav-links a { font-size: 0.65rem; letter-spacing: 0.04em; }
+
+      .hero { padding: 6rem 1.25rem 3rem; min-height: auto; }
+      .hero h1 { font-size: clamp(3rem, 12vw, 5rem); }
+      .hero-sub { font-size: 0.9rem; }
+      .hero-illustration { display: none; }
+
+      section { padding: 3rem 1.25rem; }
+      .services-grid { grid-template-columns: 1fr; }
+      .service-card { padding: 2rem 1.5rem; }
+
+      .about { grid-template-columns: 1fr; gap: 2rem; }
+      .about-visual { aspect-ratio: 16/9; }
+
+      .contact-info { gap: 1.5rem; flex-direction: column; align-items: center; }
+
+      .map-wrapper iframe { height: 280px; }
+
+      footer { padding: 1.5rem; }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 { font-size: clamp(2.2rem, 10vw, 3rem); }
+      .hero-tag { font-size: 0.6rem; letter-spacing: 0.2em; }
+      .hero-cta { padding: 0.8rem 1.5rem; font-size: 0.75rem; }
+      .section-title { font-size: clamp(1.8rem, 8vw, 2.5rem); }
+      .section-label { font-size: 0.65rem; }
+      .service-card h3 { font-size: 1.1rem; }
+      .service-card p { font-size: 0.8rem; }
+      .service-icon { font-size: 1.5rem; }
+      .service-number { font-size: 2rem; }
+      .nav-links { gap: 0.6rem; }
+      .nav-links a { font-size: 0.55rem; }
+      .map-wrapper iframe { height: 220px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grain"></div>
+
+  <nav id="navbar">
+    <a href="#" class="logo">
+      TRUNG <span>TÍN</span>
+      <span class="logo-sub" data-i18n="nav.sub">SỬA XE MÔ TÔ / MOTORBIKE REPAIR</span>
+    </a>
+    <div class="nav-links">
+      <a href="#services" data-i18n="nav.services">Dịch vụ / Services</a>
+      <a href="#about" data-i18n="nav.about">Câu chuyện / About</a>
+      <a href="#map" data-i18n="nav.map">Bản đồ / Map</a>
+      <a href="#contact" data-i18n="nav.contact">Liên hệ / Contact</a>
+    </div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="vi">VI</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-grid-bg"></div>
+    <div class="hero-content">
+      <p class="hero-tag" data-i18n="hero.tag">SỬA XE MÔ TÔ CHUYÊN NGHIỆP</p>
+      <h1>
+        <span class="strike" data-i18n="hero.line1">HƯ?</span><br>
+        <span class="outline" data-i18n="hero.line2">KHÔNG</span><br>
+        <span data-i18n="hero.line3">SỢ!</span>
+      </h1>
+      <p class="hero-sub" data-i18n="hero.sub">Chuyên sửa chữa, bảo dưỡng và độ xe mô tô phân khối lớn. Từ xe số đến xe tay côn — chúng tôi đều làm được.</p>
+      <a href="#contact" class="hero-cta" data-i18n="hero.cta">LIÊN HỆ NGAY</a>
+    </div>
+    <div class="hero-illustration" aria-hidden="true">
+      <svg viewBox="0 0 500 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="140" cy="320" rx="55" ry="55" stroke="currentColor" stroke-width="3" fill="none"/>
+        <ellipse cx="140" cy="320" rx="30" ry="30" stroke="currentColor" stroke-width="2" fill="none" opacity="0.4"/>
+        <ellipse cx="370" cy="320" rx="55" ry="55" stroke="currentColor" stroke-width="3" fill="none"/>
+        <ellipse cx="370" cy="320" rx="30" ry="30" stroke="currentColor" stroke-width="2" fill="none" opacity="0.4"/>
+        <path d="M140 265 L140 240 L200 240 L260 140 L330 140 L360 210 L370 265" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M260 240 L330 240 L370 265" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M160 280 L360 280" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.5"/>
+        <path d="M195 240 L260 240" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.4"/>
+        <path d="M300 180 L330 140" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M260 140 L280 180" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M270 180 L310 180 L310 210 L270 210 Z" stroke="currentColor" stroke-width="2" fill="none" opacity="0.3"/>
+        <path d="M195 240 L210 220 L250 220 L260 240" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.4"/>
+        <circle cx="375" cy="190" r="8" stroke="currentColor" stroke-width="2" fill="none"/>
+        <path d="M375 182 L375 170" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M375 198 L375 210" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M367 190 L355 190" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M383 190 L395 190" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M80 320 L40 360 L100 360 Z" stroke="currentColor" stroke-width="2" fill="none" opacity="0.3"/>
+        <path d="M200 240 L240 240 L240 320 L200 320 Z" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.15"/>
+        <line x1="300" y1="320" x2="300" y2="370" stroke="currentColor" stroke-width="2" opacity="0.3"/>
+        <line x1="300" y1="370" x2="270" y2="390" stroke="currentColor" stroke-width="2" opacity="0.2"/>
+        <line x1="300" y1="370" x2="330" y2="390" stroke="currentColor" stroke-width="2" opacity="0.2"/>
+        <line x1="300" y1="320" x2="300" y2="370" stroke="currentColor" stroke-width="2" opacity="0.3"/>
+        <path d="M370 320 L370 370" stroke="currentColor" stroke-width="2" opacity="0.3"/>
+        <path d="M140 320 L140 380" stroke="currentColor" stroke-width="2" opacity="0.3"/>
+        <line x1="140" y1="380" x2="120" y2="395" stroke="currentColor" stroke-width="1.5" opacity="0.2"/>
+        <line x1="140" y1="380" x2="160" y2="395" stroke="currentColor" stroke-width="1.5" opacity="0.2"/>
+      </svg>
+    </div>
+  </section>
+
+  <section class="services" id="services">
+    <div class="services-header">
+      <p class="section-label" data-i18n="services.label">DỊCH VỤ</p>
+      <h2 class="section-title" data-i18n="services.title">Chúng tôi làm gì?</h2>
+    </div>
+    <div class="services-grid">
+      <div class="service-card">
+        <span class="service-number">01</span>
+        <div class="service-icon">🔧</div>
+        <h3 data-i18n="services.s1t">Sửa chữa động cơ</h3>
+        <p data-i18n="services.s1d">Chẩn đoán và sửa chữa mọi vấn đề về động cơ. Từ xe số 50cc đến xe phân khối lớn 1000cc+.</p>
+      </div>
+      <div class="service-card">
+        <span class="service-number">02</span>
+        <div class="service-icon">🛞</div>
+        <h3 data-i18n="services.s2t">Thay nhớt & bảo dưỡng</h3>
+        <p data-i18n="services.s2d">Thay nhớt định kỳ, vệ sinh kim phun, thay lọc gió, bugi — giữ xe luôn ở trạng thái tốt nhất.</p>
+      </div>
+      <div class="service-card">
+        <span class="service-number">03</span>
+        <div class="service-icon">⚡</div>
+        <h3 data-i18n="services.s3t">Điện & cảm biến</h3>
+        <p data-i18n="services.s3d">Sửa chữa hệ thống điện, thay ắc quy, đèn LED, cảm biến ABS, và hệ thống đánh lửa.</p>
+      </div>
+      <div class="service-card">
+        <span class="service-number">04</span>
+        <div class="service-icon">🏍️</div>
+        <h3 data-i18n="services.s4t">Độ xe & nâng cấp</h3>
+        <p data-i18n="services.s4d">Độ pô, nâng cấp phanh, thay nhún, độ đèn, pô, mâm — biến chiếc xe của bạn thành cá tính riêng.</p>
+      </div>
+      <div class="service-card">
+        <span class="service-number">05</span>
+        <div class="service-icon">🛡️</div>
+        <h3 data-i18n="services.s5t">Sơn & phục chế</h3>
+        <p data-i18n="services.s5d">Sơn xe, phục chế xe cổ, đánh bóng, dán decal — mang lại diện mạo mới cho xế yêu.</p>
+      </div>
+      <div class="service-card">
+        <span class="service-number">06</span>
+        <div class="service-icon">📋</div>
+        <h3 data-i18n="services.s6t">Kiểm tra tổng quát</h3>
+        <p data-i18n="services.s6d">Kiểm tra toàn bộ xe trước chuyến đi dài, đăng kiểm, hoặc khi mua xe cũ.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="about">
+      <div class="about-visual">
+        <div class="hex-ring"></div>
+        <div class="hex">🔩</div>
+      </div>
+      <div>
+        <p class="section-label" data-i18n="about.label">CÂU CHUYỆN</p>
+        <h2 class="section-title" data-i18n="about.title">Hơn 15 năm<br>kinh nghiệm</h2>
+        <p data-i18n="about.p1"><strong>Trung Tín</strong> khởi đầu là một tiệm sửa xe nhỏ ở Sài Gòn. Với niềm đam mê xe cộ và tay nghề vững, chúng tôi đã xây dựng được lòng tin với hàng ngàn khách hàng qua nhiều năm.</p>
+        <p data-i18n="about.p2">Từ những chiếc xe số phổ thông đến mô tô phân khối lớn nhập khẩu, chúng tôi hiểu rõ từng con ốc, từng sợi dây điện. Đội ngũ thợ lành nghề luôn cập nhật công nghệ mới nhất trong ngành sửa chữa xe máy.</p>
+        <p data-i18n="about.p3"><strong>Cam kết:</strong> Làm đúng — làm nhanh — làm tới nơi. Bảo hành uy tín trên từng dịch vụ.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" id="contact">
+    <p class="section-label" data-i18n="contact.label">LIÊN HỆ</p>
+    <h2 class="section-title" data-i18n="contact.title">Ghé tiệm hoặc gọi</h2>
+    <div class="contact-info">
+      <div>
+        <h4 data-i18n="contact.address">ĐỊA CHỈ</h4>
+        <p data-i18n="contact.addressVal">96 Ấp Bình Hữu 1, Mỹ Hạnh<br>Tây Ninh, Việt Nam</p>
+      </div>
+      <div>
+        <h4 data-i18n="contact.hours">GIỜ LÀM VIỆC</h4>
+        <p data-i18n="contact.hoursVal">T2–T7: 7:30 – 18:00<br>CN: 8:00 – 12:00</p>
+      </div>
+      <div>
+        <h4 data-i18n="contact.phone">ĐIỆN THOẠI</h4>
+        <p>0903 352 743</p>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <p style="color:var(--concrete);font-size:0.85rem;font-weight:300;" data-i18n="contact.note">
+      Có dịch vụ cứu hộ 24/7 trong nội thành. Gọi hotline khi cần gấp.
+    </p>
+  </section>
+
+  <section class="map" id="map">
+    <p class="section-label" data-i18n="map.label">BẢN ĐỒ</p>
+    <h2 class="section-title" data-i18n="map.title">Tìm chúng tôi trên bản đồ</h2>
+    <a href="https://maps.app.goo.gl/gKHhiNVFkC8zHVMU6" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+      <div class="map-wrapper">
+        <iframe src="https://maps.google.com/maps?q=96+Ấp+Bình+Hữu+1+Mỹ+Hạnh+Tây+Ninh&output=embed" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" style="pointer-events:none;"></iframe>
+      </div>
+    </a>
+    <p style="color:var(--concrete-dark);font-size:0.75rem;margin-top:1rem;font-weight:300;" data-i18n="map.click">Bấm vào bản đồ để mở trong Google Maps</p>
+  </section>
+
+  <footer>
+    <a href="#" class="logo">
+      TRUNG <span>TÍN</span>
+    </a>
+    <p data-i18n="footer">© 2026 Trung Tín — Sửa xe mô tô uy tín tại Sài Gòn.</p>
+  </footer>
+
+  <script>
+    const i18n = {
+      en: {
+        'nav.sub': 'MOTORBIKE REPAIR',
+        'nav.services': 'Services',
+        'nav.about': 'About',
+        'nav.map': 'Map',
+        'nav.contact': 'Contact',
+        'hero.tag': 'PROFESSIONAL MOTORBIKE REPAIR',
+        'hero.line1': 'BROKEN?',
+        'hero.line2': 'NO',
+        'hero.line3': 'WORRIES!',
+        'hero.sub': 'Specialized in repair, maintenance and customization of motorcycles. From scooters to superbikes — we do it all.',
+        'hero.cta': 'CONTACT US',
+        'services.label': 'SERVICES',
+        'services.title': 'What we do?',
+        'services.s1t': 'Engine Repair',
+        'services.s1d': 'Diagnose and fix all engine issues. From 50cc scooters to 1000cc+ superbikes.',
+        'services.s2t': 'Oil Change & Maintenance',
+        'services.s2d': 'Regular oil changes, injector cleaning, air filter and spark plug replacement — keep your bike in top shape.',
+        'services.s3t': 'Electrical & Sensors',
+        'services.s3d': 'Electrical system repair, battery replacement, LED lights, ABS sensors, ignition systems.',
+        'services.s4t': 'Customization & Upgrades',
+        'services.s4d': 'Exhaust mods, brake upgrades, suspension work, custom lights, rims — make your bike yours.',
+        'services.s5t': 'Painting & Restoration',
+        'services.s5d': 'Paint jobs, vintage restoration, polishing, decals — a fresh look for your ride.',
+        'services.s6t': 'Full Inspection',
+        'services.s6d': 'Complete bike check before long trips, registration, or buying a used bike.',
+        'about.label': 'OUR STORY',
+        'about.title': 'Over 15 years<br>of experience',
+        'about.p1': '<strong>Trung Tín</strong> started as a small repair shop in Saigon. With a passion for motorcycles and solid craftsmanship, we\'ve built trust with thousands of customers over the years.',
+        'about.p2': 'From everyday scooters to imported superbikes, we know every bolt, every wire. Our skilled team stays up to date with the latest motorcycle repair technology.',
+        'about.p3': '<strong>Our promise:</strong> Do it right — do it fast — do it thoroughly. Reliable warranty on every service.',
+        'contact.label': 'CONTACT',
+        'contact.title': 'Visit or call us',
+        'contact.address': 'ADDRESS',
+        'contact.addressVal': '96 Ấp Bình Hữu 1, Mỹ Hạnh<br>Tây Ninh, Việt Nam',
+        'contact.hours': 'HOURS',
+        'contact.hoursVal': 'Mon–Sat: 7:30 AM – 6:00 PM<br>Sun: 8:00 AM – 12:00 PM',
+        'contact.phone': 'PHONE',
+        'contact.note': 'Call now for consultation and on-site repair service.',
+        'map.label': 'MAP',
+        'map.title': 'Find us on the map',
+        'map.click': 'Click the map to open in Google Maps',
+        'footer': '© 2026 Trung Tín — Trusted motorbike repair in Saigon.'
+      },
+      vi: {
+        'nav.sub': 'SỬA XE MÔ TÔ',
+        'nav.services': 'Dịch vụ',
+        'nav.about': 'Câu chuyện',
+        'nav.map': 'Bản đồ',
+        'nav.contact': 'Liên hệ',
+        'hero.tag': 'SỬA XE MÔ TÔ CHUYÊN NGHIỆP',
+        'hero.line1': 'HƯ?',
+        'hero.line2': 'KHÔNG',
+        'hero.line3': 'SỢ!',
+        'hero.sub': 'Chuyên sửa chữa, bảo dưỡng và độ xe mô tô phân khối lớn. Từ xe số đến xe tay côn — chúng tôi đều làm được.',
+        'hero.cta': 'LIÊN HỆ NGAY',
+        'services.label': 'DỊCH VỤ',
+        'services.title': 'Chúng tôi làm gì?',
+        'services.s1t': 'Sửa chữa động cơ',
+        'services.s1d': 'Chẩn đoán và sửa chữa mọi vấn đề về động cơ. Từ xe số 50cc đến xe phân khối lớn 1000cc+.',
+        'services.s2t': 'Thay nhớt & bảo dưỡng',
+        'services.s2d': 'Thay nhớt định kỳ, vệ sinh kim phun, thay lọc gió, bugi — giữ xe luôn ở trạng thái tốt nhất.',
+        'services.s3t': 'Điện & cảm biến',
+        'services.s3d': 'Sửa chữa hệ thống điện, thay ắc quy, đèn LED, cảm biến ABS, và hệ thống đánh lửa.',
+        'services.s4t': 'Độ xe & nâng cấp',
+        'services.s4d': 'Độ pô, nâng cấp phanh, thay nhún, độ đèn, pô, mâm — biến chiếc xe của bạn thành cá tính riêng.',
+        'services.s5t': 'Sơn & phục chế',
+        'services.s5d': 'Sơn xe, phục chế xe cổ, đánh bóng, dán decal — mang lại diện mạo mới cho xế yêu.',
+        'services.s6t': 'Kiểm tra tổng quát',
+        'services.s6d': 'Kiểm tra toàn bộ xe trước chuyến đi dài, đăng kiểm, hoặc khi mua xe cũ.',
+        'about.label': 'CÂU CHUYỆN',
+        'about.title': 'Hơn 15 năm<br>kinh nghiệm',
+        'about.p1': '<strong>Trung Tín</strong> khởi đầu là một tiệm sửa xe nhỏ ở Sài Gòn. Với niềm đam mê xe cộ và tay nghề vững, chúng tôi đã xây dựng được lòng tin với hàng ngàn khách hàng qua nhiều năm.',
+        'about.p2': 'Từ những chiếc xe số phổ thông đến mô tô phân khối lớn nhập khẩu, chúng tôi hiểu rõ từng con ốc, từng sợi dây điện. Đội ngũ thợ lành nghề luôn cập nhật công nghệ mới nhất trong ngành sửa chữa xe máy.',
+        'about.p3': '<strong>Cam kết:</strong> Làm đúng — làm nhanh — làm tới nơi. Bảo hành uy tín trên từng dịch vụ.',
+        'contact.label': 'LIÊN HỆ',
+        'contact.title': 'Ghé tiệm hoặc gọi',
+        'contact.address': 'ĐỊA CHỈ',
+        'contact.addressVal': '96 Ấp Bình Hữu 1, Mỹ Hạnh<br>Tây Ninh, Việt Nam',
+        'contact.hours': 'GIỜ LÀM VIỆC',
+        'contact.hoursVal': 'T2–T7: 7:30 – 18:00<br>CN: 8:00 – 12:00',
+        'contact.phone': 'ĐIỆN THOẠI',
+        'contact.note': 'Gọi ngay để được tư vấn và sửa chữa tận nơi.',
+        'map.label': 'BẢN ĐỒ',
+        'map.title': 'Tìm chúng tôi trên bản đồ',
+        'map.click': 'Bấm vào bản đồ để mở trong Google Maps',
+        'footer': '© 2026 Trung Tín — Sửa xe mô tô uy tín tại Sài Gòn.'
+      }
+    };
+
+    let currentLang = 'vi';
+
+    function setLang(lang) {
+      currentLang = lang;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        if (i18n[lang][key]) {
+          el.innerHTML = i18n[lang][key];
+        }
+      });
+      document.querySelectorAll('.lang-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.lang === lang);
+      });
+      document.documentElement.lang = lang === 'en' ? 'en' : 'vi';
+    }
+
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => setLang(btn.dataset.lang));
+    });
+
+    const nav = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) t.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    setLang('vi');
+  </script>
+</body>
+</html>

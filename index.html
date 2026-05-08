@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMBER — Coffee After Dark</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --charcoal: #0f0f0f;
+      --charcoal-2: #1a1a1a;
+      --charcoal-3: #2a2a2a;
+      --amber: #d97706;
+      --ember: #f59e0b;
+      --ember-glow: #fbbf24;
+      --cream: #faf3e0;
+      --cream-dim: #d4c9b5;
+      --smoke: rgba(250, 243, 224, 0.05);
+      --font-display: 'DM Serif Display', serif;
+      --font-body: 'Inter', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--charcoal);
+      color: var(--cream);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    ::selection { background: var(--amber); color: var(--charcoal); }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 256px 256px;
+    }
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1.5rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.4s;
+    }
+    nav.scrolled { background: rgba(15,15,15,0.85); backdrop-filter: blur(20px); }
+    .logo {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      letter-spacing: 0.15em;
+      color: var(--cream);
+      text-decoration: none;
+    }
+    .logo span { color: var(--amber); }
+    .nav-links { display: flex; gap: 2.5rem; }
+    .nav-links a {
+      color: var(--cream-dim);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: color 0.3s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--amber);
+      transition: width 0.3s;
+    }
+    .nav-links a:hover { color: var(--cream); }
+    .nav-links a:hover::after { width: 100%; }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(217,119,6,0.08) 0%, transparent 70%),
+                  radial-gradient(ellipse 60% 40% at 50% 60%, rgba(251,191,36,0.04) 0%, transparent 60%),
+                  var(--charcoal);
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(2px 2px at 20% 30%, rgba(251,191,36,0.3), transparent),
+                  radial-gradient(2px 2px at 80% 20%, rgba(217,119,6,0.2), transparent),
+                  radial-gradient(1px 1px at 40% 70%, rgba(251,191,36,0.25), transparent),
+                  radial-gradient(1px 1px at 70% 80%, rgba(217,119,6,0.15), transparent);
+      background-size: 200px 200px;
+      animation: emberDrift 12s ease-in-out infinite alternate;
+    }
+    @keyframes emberDrift {
+      0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+      100% { transform: translate(30px, -20px) scale(1.1); opacity: 1; }
+    }
+
+    #ember-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeUp 1.2s ease forwards;
+    }
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero-tag {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.3s forwards;
+    }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(4rem, 12vw, 9rem);
+      font-weight: 400;
+      line-height: 0.92;
+      letter-spacing: -0.03em;
+      color: var(--cream);
+      opacity: 0;
+      animation: fadeUp 1s ease 0.5s forwards;
+    }
+    .hero h1 em {
+      font-style: italic;
+      color: var(--amber);
+    }
+    .hero-sub {
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: var(--cream-dim);
+      max-width: 480px;
+      margin: 2rem auto 0;
+      line-height: 1.7;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.7s forwards;
+    }
+    .hero-cta {
+      display: inline-block;
+      margin-top: 2.5rem;
+      padding: 1rem 2.5rem;
+      border: 1px solid var(--amber);
+      color: var(--cream);
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: all 0.4s;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.9s forwards;
+    }
+    .hero-cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--amber);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      z-index: -1;
+    }
+    .hero-cta:hover { color: var(--charcoal); border-color: var(--amber); }
+    .hero-cta:hover::before { transform: scaleX(1); transform-origin: left; }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      animation: fadeUp 1s ease 1.2s forwards;
+    }
+    .scroll-line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--amber), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+    .scroll-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--cream-dim);
+    }
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.4; transform: scaleY(1); }
+      50% { opacity: 1; transform: scaleY(1.2); }
+    }
+
+    section { padding: 7rem 3rem; }
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 400;
+      line-height: 1.1;
+      color: var(--cream);
+    }
+
+    .story {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      align-items: center;
+    }
+    .story-visual {
+      position: relative;
+      aspect-ratio: 3/4;
+      overflow: hidden;
+    }
+    .story-visual .glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 80%, rgba(217,119,6,0.15), transparent 70%);
+    }
+    .story-visual .frame {
+      position: absolute;
+      inset: 1.5rem;
+      border: 1px solid rgba(217,119,6,0.2);
+    }
+    .story-visual .frame-inner {
+      position: absolute;
+      inset: 2rem;
+      border: 1px solid rgba(217,119,6,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 5rem;
+      color: rgba(217,119,6,0.08);
+    }
+    .story p {
+      color: var(--cream-dim);
+      font-weight: 300;
+      font-size: 1rem;
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+    }
+    .story p:last-child { margin-bottom: 0; }
+
+    .menu-section {
+      background: var(--charcoal-2);
+    }
+    .menu-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      max-width: 1000px;
+      margin: 0 auto;
+      border: 1px solid rgba(217,119,6,0.1);
+    }
+    .menu-item {
+      padding: 2.5rem 2rem;
+      border: 1px solid rgba(217,119,6,0.06);
+      transition: background 0.4s;
+      position: relative;
+    }
+    .menu-item:hover { background: rgba(217,119,6,0.04); }
+    .menu-item .price {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      color: var(--amber);
+      margin-bottom: 0.5rem;
+    }
+    .menu-item h3 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 0.4rem;
+    }
+    .menu-item p {
+      font-size: 0.82rem;
+      color: var(--cream-dim);
+      font-weight: 300;
+      line-height: 1.6;
+    }
+
+    .location-section {
+      text-align: center;
+      position: relative;
+    }
+    .location-content {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .location-detail {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin-top: 3rem;
+      flex-wrap: wrap;
+    }
+    .location-detail > div {
+      text-align: center;
+    }
+    .location-detail h4 {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      color: var(--amber);
+      margin-bottom: 0.5rem;
+      font-weight: 400;
+    }
+    .location-detail p {
+      font-size: 0.85rem;
+      color: var(--cream-dim);
+      font-weight: 300;
+      line-height: 1.6;
+    }
+    .location-divider {
+      width: 1px;
+      height: 60px;
+      background: rgba(217,119,6,0.2);
+      margin: 3rem auto;
+    }
+
+    footer {
+      padding: 3rem;
+      text-align: center;
+      border-top: 1px solid rgba(217,119,6,0.06);
+    }
+    footer p {
+      font-size: 0.75rem;
+      color: var(--cream-dim);
+      letter-spacing: 0.05em;
+    }
+    footer .logo {
+      display: inline-block;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { gap: 1.5rem; }
+      .nav-links a { font-size: 0.75rem; }
+      section { padding: 4rem 1.5rem; }
+      .story { grid-template-columns: 1fr; gap: 3rem; }
+      .story-visual { aspect-ratio: 4/3; }
+      .menu-grid { grid-template-columns: 1fr; }
+      .location-detail { gap: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+
+  <nav id="navbar">
+    <a href="#" class="logo">EM<span>B</span>ER</a>
+    <div class="nav-links">
+      <a href="#story">Story</a>
+      <a href="#menu">Menu</a>
+      <a href="#location">Location</a>
+    </div>
+  </nav>
+
+  <section class="hero" id="hero">
+    <canvas id="ember-canvas"></canvas>
+    <div class="hero-content">
+      <p class="hero-tag">Est. 2026</p>
+      <h1>Darkness<br>has a <em>flavor</em></h1>
+      <p class="hero-sub">Small-batch coffee roasted after midnight. Made for those who find clarity in the quiet hours.</p>
+      <a href="#menu" class="hero-cta">Explore the menu</a>
+    </div>
+    <div class="scroll-indicator">
+      <span class="scroll-label">Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <section id="story">
+    <div class="story">
+      <div class="story-visual">
+        <div class="glow"></div>
+        <div class="frame">
+          <div class="frame-inner">☕</div>
+        </div>
+      </div>
+      <div>
+        <p class="section-label">Our Story</p>
+        <h2 class="section-title">Born in the <br>small hours</h2>
+        <p>EMBER began in a cramped garage at 3 AM, fueled by obsession and a single espresso shot. We believe the best coffee happens when the world is quiet — when every variable can be controlled, every bean given full attention.</p>
+        <p>We source single-origin beans from small farms in Ethiopia, Colombia, and Sumatra. Each batch is roasted in micro-lots under the cover of darkness, locking in flavors that most never get to taste.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="menu-section" id="menu">
+    <div class="menu-header">
+      <p class="section-label">The Menu</p>
+      <h2 class="section-title">What we serve</h2>
+    </div>
+    <div class="menu-grid">
+      <div class="menu-item">
+        <div class="price">$6</div>
+        <h3>Midnight Pour-Over</h3>
+        <p>Single-origin Ethiopian Yirgacheffe, slow-dripped at 195°F. Floral, with notes of bergamot and honey.</p>
+      </div>
+      <div class="menu-item">
+        <div class="price">$5</div>
+        <h3>Charcoal Latte</h3>
+        <p>Activated charcoal meets double ristretto. Served with oat milk and a dash of cinnamon.</p>
+      </div>
+      <div class="menu-item">
+        <div class="price">$7</div>
+        <h3>Ember Affogato</h3>
+        <p>Vanilla bean gelato drowned in a fresh-pulled shot. Finished with smoked salt.</p>
+      </div>
+      <div class="menu-item">
+        <div class="price">$4</div>
+        <h3>Cold Brew</h3>
+        <p>Steeped 36 hours in small batches. Smooth, chocolatey, with zero bitterness.</p>
+      </div>
+      <div class="menu-item">
+        <div class="price">$5</div>
+        <h3>Smoked Maple Latte</h3>
+        <p>Cold-smoked maple syrup meets a bold Colombia roast. Topped with burnt sugar.</p>
+      </div>
+      <div class="menu-item">
+        <div class="price">$8</div>
+        <h3>Flight</h3>
+        <p>Three 4 oz pours — our rotating selection. The best way to explore what darkness has to offer.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="location">
+    <div class="location-content">
+      <p class="section-label">Find Us</p>
+      <h2 class="section-title">Come through<br>the dark</h2>
+      <div class="location-detail">
+        <div>
+          <h4>Address</h4>
+          <p>47 Bleecker Street<br>New York, NY 10012</p>
+        </div>
+        <div>
+          <h4>Hours</h4>
+          <p>Mon–Fri: 6 PM – 2 AM<br>Sat–Sun: 8 PM – 4 AM</p>
+        </div>
+        <div>
+          <h4>Contact</h4>
+          <p>hello@embercoffee.com<br>(212) 555‑0187</p>
+        </div>
+      </div>
+      <div class="location-divider"></div>
+      <p style="color:var(--cream-dim);font-size:0.85rem;font-weight:300;max-width:440px;margin:0 auto;line-height:1.7;">
+        No Wi-Fi. No laptops. Just coffee, candlelight, and the company you keep.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    <a href="#" class="logo">EM<span>B</span>ER</a>
+    <p>© 2026 Ember Coffee Co. — Roasted after dark.</p>
+  </footer>
+
+  <script>
+    const canvas = document.getElementById('ember-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, particles = [];
+
+    function resize() {
+      W = canvas.width = canvas.offsetWidth;
+      H = canvas.height = canvas.offsetHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Ember {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * W;
+        this.y = H + Math.random() * 100;
+        this.size = Math.random() * 3 + 1;
+        this.speedY = -(Math.random() * 0.6 + 0.2);
+        this.speedX = (Math.random() - 0.5) * 0.3;
+        this.life = 1;
+        this.decay = Math.random() * 0.008 + 0.004;
+        this.hue = Math.random() > 0.5 ? 38 : 25;
+      }
+      update() {
+        this.x += this.speedX + Math.sin(this.y * 0.01) * 0.2;
+        this.y += this.speedY;
+        this.life -= this.decay;
+        if (this.life <= 0 || this.y < -20) this.reset();
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * this.life, 0, Math.PI * 2);
+        const alpha = this.life * (0.6 + Math.random() * 0.2);
+        ctx.fillStyle = `hsla(${this.hue}, 100%, ${60 + (1 - this.life) * 30}%, ${alpha})`;
+        ctx.fill();
+        if (this.life > 0.6) {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size * this.life * 2, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${this.hue}, 100%, 70%, ${alpha * 0.2})`;
+          ctx.fill();
+        }
+      }
+    }
+
+    for (let i = 0; i < 60; i++) {
+      const e = new Ember();
+      e.y = Math.random() * H;
+      e.life = Math.random();
+      particles.push(e);
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, W, H);
+      particles.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    const nav = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) t.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  </script>
+</body>
+</html>
